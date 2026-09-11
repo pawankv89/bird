@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Bird Game</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial, sans-serif;
+}
+
+/* Sky */
+#game{
+    width:100vw;
+    height:100vh;
+    position:relative;
+    background:linear-gradient(#87CEEB 0%, #87CEEB 65%, #32CD32 65%);
+}
+
+/* Tree */
+.tree{
+    position:absolute;
+    bottom:120px;
+    left:100px;
+}
+
+.trunk{
+    width:40px;
+    height:180px;
+    background:#8B4513;
+    margin:auto;
+}
+
+.leaves{
+    width:160px;
+    height:160px;
+    background:#228B22;
+    border-radius:50%;
+    position:absolute;
+    top:-100px;
+    left:-60px;
+}
+
+/* Bird */
+#bird{
+    position:absolute;
+    left:135px;
+    top:210px;
+    font-size:50px;
+    transition:all 3s ease-in-out;
+    filter:drop-shadow(0 0 10px gold);
+    z-index:10;
+}
+
+/* Flying animation */
+.fly{
+    animation:flap .3s infinite alternate;
+}
+
+@keyframes flap{
+    from{transform:rotate(-10deg);}
+    to{transform:rotate(10deg);}
+}
+
+/* UI */
+.panel{
+    position:absolute;
+    top:20px;
+    left:20px;
+    z-index:100;
+}
+
+button{
+    padding:12px 25px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    background:orange;
+    color:white;
+    cursor:pointer;
+    box-shadow:0 0 15px gold;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+#score{
+    font-size:24px;
+    color:white;
+    font-weight:bold;
+    text-shadow:2px 2px 5px black;
+    margin-top:10px;
+}
+
+/* Sparkles */
+.spark{
+    position:absolute;
+    width:10px;
+    height:10px;
+    background:yellow;
+    border-radius:50%;
+    pointer-events:none;
+    animation:spark 1s forwards;
+}
+
+@keyframes spark{
+    from{
+        opacity:1;
+        transform:scale(1);
+    }
+    to{
+        opacity:0;
+        transform:translateY(-80px) scale(3);
+    }
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+
+<div class="panel">
+    <button onclick="flyBird()">🐦 Open Bird</button>
+    <div id="score">Points: 0</div>
+    <div style="color:white;margin-top:10px">
+        Say: <b>"Open Bird"</b>
+    </div>
+</div>
+
+<div class="tree">
+    <div class="leaves"></div>
+    <div class="trunk"></div>
+</div>
+
+<div id="bird">🐦</div>
+
+</div>
+
+<script>
+let score = 0;
+const bird = document.getElementById("bird");
+
+function createSparkles(x,y){
+    for(let i=0;i<15;i++){
+        const s = document.createElement("div");
+        s.className="spark";
+        s.style.left=(x + Math.random()*80-40)+"px";
+        s.style.top=(y + Math.random()*80-40)+"px";
+        document.body.appendChild(s);
+
+        setTimeout(()=>s.remove(),1000);
+    }
+}
+
+function flyBird(){
+
+    score += 10;
+    document.getElementById("score").innerText =
+        "Points: " + score;
+
+    bird.classList.add("fly");
+
+    bird.style.left =
+      (window.innerWidth - 200) + "px";
+
+    bird.style.top =
+      (100 + Math.random()*250) + "px";
+
+    createSparkles(
+      bird.offsetLeft,
+      bird.offsetTop
+    );
+
+    setTimeout(()=>{
+        bird.classList.remove("fly");
+
+        bird.style.left="135px";
+        bird.style.top="210px";
+    },3500);
+}
+
+/* Voice Command */
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+if(SpeechRecognition){
+
+    const recognition =
+    new SpeechRecognition();
+
+    recognition.continuous=true;
+    recognition.lang='en-US';
+
+    recognition.onresult=(event)=>{
+        const text =
+        event.results[event.results.length-1][0]
+        .transcript
+        .toLowerCase();
+
+        if(text.includes("open bird")){
+            flyBird();
+        }
+    };
+
+    recognition.start();
+}
+</script>
+
+</body>
+</html>
